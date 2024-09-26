@@ -3,7 +3,7 @@
 __pycache__/
 *.so
 helper.py
-./helper_functions/
+helper_functions/
 
 
 # Django
