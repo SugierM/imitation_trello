@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'sslserver',
     'corsheaders',
     'guardian',
+    'rest_framework',
     # Your apps...
     'Users',
     'Boards',
@@ -202,3 +203,5 @@ if not DEBUG:
 # Ensure the secret key is set
 if not SECRET_KEY:
     raise ValueError("The SECRET_KEY environment variable is not set!")
+
+ANONYMOUS_USER_ID = -1

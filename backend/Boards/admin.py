@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Board, Element, Task, Comment, Activity, Attachment, SubTask
+
+admin.site.register([Board, Element, Task, Comment, Activity, Attachment, SubTask])
