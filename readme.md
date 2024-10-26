@@ -14,29 +14,30 @@ SECRET_KEY=""
 
 VITE_API_URL=""
 HOST=""
-
+git
 ### Overview to help myself :) 
 Not a documentation for enduser.
 
 # UI routes
-"/" - Home (Protected route, accessible only to authenticated users.)
-"/login" - Login form
-"/logout" - Logout with redirection
-"/register" - Register form
-"/profile" - Profile page (Protected route, accessible only to authenticated users.)
+"/" - Home (Protected route, accessible only to authenticated users.)  
+"/login" - Login form  
+"/logout" - Logout with redirection  
+"/register" - Register form  
+"/profile" - Profile page (Protected route, accessible only to authenticated users.)  
+
 
 # API routes
 ## Users
-For all activieties must be authenticated.*
+For all activieties must be authenticated.*  
 
 "users/" - Main branch
     ... create_user/ - User creation (login: email, password: passwords)
-        Doesn't have to be authenticated.
+        Doesn't have to be authenticated.  
 
-    ... search_user/ - Search user based on first name
+    ... search_user/ - Search user based on first name  
 
-    ... profile/ - User profile information
-        Returns only information about logged in user.
+    ... profile/ - User profile information  
+        Returns only information about logged in user.  
 
         *returns*
         {
@@ -55,11 +56,11 @@ For all activieties must be authenticated.*
             "url": ""
         }
 
-*Exeptions signaled individually
+*Exeptions signaled individually  
 
 ## Boards
 
 
-"boards/"
+"boards/"  
 
-Routers were used. Implementation in progress.
+Routers were used. Implementation in progress.  
