@@ -39,7 +39,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
@@ -49,3 +49,21 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "password": {"write_only": True},
         }
+
+class UserLookupSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name="user-profile",
+        lookup_field="pk"
+    )
+    class Meta:
+        model = User
+        fields = [
+            "email",
+            "url"
+        ]
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        email: str = representation.get("email")
+        if email and email.endswith("@admin.pl"):
+            representation["email"] = "hidden@hidden.pl"
+        return representation

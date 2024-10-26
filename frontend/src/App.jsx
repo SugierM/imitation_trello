@@ -3,6 +3,7 @@ import Footer from "./components/Footer/Footer"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
+import UserProfile from "./pages/UserProfile"
 import Home from "./pages/Home"
 import NotAuthorized from "./pages/NotAuthorized"
 import NotFound from "./pages/NotFound"
@@ -27,6 +28,7 @@ function App() {
         <Route path="/login" element={<Login />}></Route>
         <Route path="/logout" element={<Logout />}></Route>
         <Route path="/register" element={<Register />}> </Route>
+        <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>}></Route>
         <Route path="*" element={<NotFound />}></Route>
       </Routes>
     </BrowserRouter>
