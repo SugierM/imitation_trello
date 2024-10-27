@@ -2,12 +2,14 @@ from django.http import JsonResponse
 import json
 from rest_framework import status, generics
 from rest_framework.views import APIView
-from Users.serializers import UserProfileSerializer, UserRegisterSerializer, UserLookupSerializer
+from Users.serializers import *
 from Users.models import User
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from .permissions import IsOwnProfile
+from django.shortcuts import get_object_or_404
+
 
 class UserCreateView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -19,24 +21,12 @@ class UserCreateView(generics.CreateAPIView):
 
 
 class UserSearchNameView(generics.ListAPIView):
-    serializer_class = UserProfileSerializer
+    serializer_class = UserLookupSerializer
     
     def get_queryset(self):
         first_name = self.kwargs.get("first_name")
-        return User.objects.filter(first_name=first_name)
+        return User.objects.filter(first_name=first_name) # Does not make sense to look up something based only on name
     
-class UserLoggedInView(APIView):
-    """
-    Test view
-    """
-    # permission_classes = [IsAuthenticated]
-    # serializer_class = UserSerializer
-    # queryset = User.objects.all()
-
-    # def get(self, request):
-    #     user = request.user
-    #     serializer = UserSerializer(user)
-    #     return Response(serializer.data)
 
 class UserProfile(APIView):
     permission_classes = [IsAuthenticated, IsOwnProfile]
@@ -47,9 +37,10 @@ class UserProfile(APIView):
         serializer = UserProfileSerializer(user)
         return Response(serializer.data)
     
+
 class UserLookupView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = UserLookupSerializer
+    serializer_class = UserProfileSerializer
     queryset = User.objects.all()
 
     def get(self, request, *args, **kwargs):
@@ -59,6 +50,16 @@ class UserLookupView(generics.RetrieveAPIView):
         else:
             return Response({"invalid": "Invalid data"}, status=404)
              
+class OtherUserPorfile(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = OtherUserProfileSerializer
+    queryset = User.objects.all()
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["user1"] = self.request.user
+        return context
+
 
 # AFTER LOGGING IN
 

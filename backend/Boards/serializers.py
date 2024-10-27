@@ -3,10 +3,10 @@ from .models import *
 from Users.serializers import UserLookupSerializer
 
 class BoardSerializer(serializers.ModelSerializer):
-    user = UserLookupSerializer()
+    creator = UserLookupSerializer()
     class Meta:
         model = Board
-        fields = ['name', 'description', 'status', "user"]
+        fields = ['name', 'description', 'status', "creator"]
 
 
 class ElementSerializer(serializers.ModelSerializer):
@@ -42,3 +42,18 @@ class AttachmentSerializer(serializers.ModelSerializer):
 class BoardMembershipSerializer(serializers.ModelSerializer):
     class Meta:
         model = BoardMembership
+        fields = [
+            "board",
+            "user",
+            "role",
+        ]
+
+    @staticmethod
+    def get_common_boards(user1, user2, context=None):
+        common_boards_ids = BoardMembership.objects.filter(user=user1).filter(
+            board__memberships__user=user2
+            ).values_list("board", flat=True).distinct()
+        
+        boards = Board.objects.filter(id__in=common_boards_ids)
+        return BoardSerializer(boards, many=True, context=context).data
+

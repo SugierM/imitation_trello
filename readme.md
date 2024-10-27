@@ -14,28 +14,29 @@ SECRET_KEY=""
 
 VITE_API_URL=""
 HOST=""
-git
+
 ### Overview to help myself :) 
 Not a documentation for enduser.
 
 # UI routes
-"/" - Home (Protected route, accessible only to authenticated users.)  
-"/login" - Login form  
-"/logout" - Logout with redirection  
-"/register" - Register form  
-"/profile" - Profile page (Protected route, accessible only to authenticated users.)  
+"/" - Home (Protected route, accessible only to authenticated users.)  <br>
+"/login" - Login form  <br>
+"/logout" - Logout with redirection  <br>
+"/register" - Register form  <br>
+"/profile" - Profile page (Protected route, accessible only to authenticated users.) <br> 
 
 
 # API routes
 ## Users
 For all activieties must be authenticated.*  
 
-"users/" - Main branch
-    ... create_user/ - User creation (login: email, password: passwords)
-        Doesn't have to be authenticated.  
+"users/" - Main branch <br>
+    ... create_user/ - User creation (login: email, password: passwords) <br>
+        Doesn't have to be authenticated.  <br>
 
     ... search_user/ - Search user based on first name  
-
+        Up to change it
+    
     ... profile/ - User profile information  
         Returns only information about logged in user.  
 
@@ -46,14 +47,36 @@ For all activieties must be authenticated.*
             "last_name": "John",
             "bio": null,
             "phone": null,
-            "nickname": "John"
+            "nickname": "John",
+            "last_login": null 
         }
+        *last_login null for now as if you log in through frontend, it won't change
 
-    ... "retr_user/<int:pk>/" - returns user email and url to backend call
-        Not working - non existent for url.
+    ... "retr_user/<int:pk>/" - returns user and common boards with logged in user  
+
+        Uses profile serializer so fields are generally the same
         {
             "email": "email@email.email",
-            "url": ""
+            "first_name": "John",
+            "last_name": "John",
+            "bio": null,
+            "phone": null,
+            "nickname": "John",
+            "last_login": null,
+            "boards": [
+            {
+                "name": "Board name",
+                "description": "Board description",
+                "status": 0, # Ongoing or Done - here Ongoing
+                "creator": {
+                    "email": "email@email.com",
+                    "nickname": "",
+                    "first_name": "John",
+                    "url": "[...]/users/retr_user/2/"
+                }
+            },
+            ...
+            ]
         }
 
 *Exeptions signaled individually  

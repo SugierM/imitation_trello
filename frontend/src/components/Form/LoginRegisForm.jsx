@@ -11,7 +11,7 @@ function LoginRegisForm({route, method}) {
     const [errorMessageP, setErrorMessageP] = useState("")
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
-    const name = method === "login" ? "Login" : "Register"
+    const name = method === "login" ? "login" : "register"
 
     const handleSubmit = async (e) => {
         setLoading(true)
