@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from .permissions import IsOwnProfile
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 
@@ -16,16 +17,38 @@ class UserCreateView(generics.CreateAPIView):
     serializer_class = UserRegisterSerializer
     permission_classes = [AllowAny]
 
-    # def perform_create(self, serializer):
-    #     pass
 
 
-class UserSearchNameView(generics.ListAPIView):
+class UserSearchView(generics.ListAPIView):
     serializer_class = UserLookupSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self, *args, **kwargs):
+        search_q: str = self.request.query_params.get('q', None)
+
+        if search_q:
+            queryset = User.objects.all()
+            search_terms = search_q.split()
+            query = Q()
+
+            for term in search_terms:
+                query |= Q(first_name__icontains=term) | Q(last_name__icontains=term) | Q(nickname__icontains=term) 
+        
+            queryset = queryset.filter(query)
+        else:
+            queryset = User.objects.none()
+        return queryset
     
-    def get_queryset(self):
-        first_name = self.kwargs.get("first_name")
-        return User.objects.filter(first_name=first_name) # Does not make sense to look up something based only on name
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset() # Check
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
     
 
 class UserProfile(APIView):

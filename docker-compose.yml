@@ -64,7 +64,8 @@ services:
         condition: service_started
 
 volumes:
-  postgres_data:
   backend:
+  frontend:
+  postgres_data:
   pgadmin:
   

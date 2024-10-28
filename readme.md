@@ -2,17 +2,17 @@
 POSTGRES_USER=""
 POSTGRES_PASSWORD=""
 
-PGADMIN_DEFAULT_EMAIL=""
+PGADMIN_DEFAULT_EMAIL=""  
 PGADMIN_DEFAULT_PASSWORD=""
 
-DJANGO_ALLOWED_HOSTS=""
-CORS_ALLOWED_ORIGINS=""
-DJANGO_DEBUG=""
-TIME_ZONE=""
+DJANGO_ALLOWED_HOSTS=""  
+CORS_ALLOWED_ORIGINS=""  
+DJANGO_DEBUG=""  
+TIME_ZONE=""  
 SECRET_KEY=""
 
 
-VITE_API_URL=""
+VITE_API_URL=""  
 HOST=""
 
 ### Overview to help myself :) 
@@ -34,9 +34,23 @@ For all activieties must be authenticated.*
     ... create_user/ - User creation (login: email, password: passwords) <br>
         Doesn't have to be authenticated.  <br>
 
-    ... search_user/ - Search user based on first name  
-        Up to change it
-    
+    ... search_user/ -  
+        Takes one parameter in request - q  
+        it can be first name, last name or nickname  
+
+        {
+            "count": int,
+            "next": "",
+            "previous": "",
+            "results": [
+                        "email": "email@email.com",
+                        "nickname": "",
+                        "first_name": "",
+                        "last_name": "",
+                        "url": ".../users/retr_user/int/"
+            ]
+        }
+
     ... profile/ - User profile information  
         Returns only information about logged in user.  
 

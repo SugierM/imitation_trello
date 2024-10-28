@@ -45,14 +45,24 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class OtherUserProfileSerializer(UserProfileSerializer):
     boards = serializers.SerializerMethodField(read_only=True)
 
-    class Meata(UserProfileSerializer.Meta):
-        fields = UserProfileSerializer.Meta.fields[:].append("boards")
+    class Meta:
+        model = User
+        fields = ['email',
+                  'first_name',
+                  'last_name',
+                  'bio',
+                  'phone',
+                  'nickname',
+                  'password',
+                  "last_login",
+                  "boards",
+                  ]
 
     def get_boards(self, obj):
         from Boards.serializers import BoardMembershipSerializer
         user1 = self.context.get("user1")
         user2 = obj
-        boards = BoardMembershipSerializer.get_common_boards(user1, user2, context=self.context)
+        boards = BoardMembershipSerializer.get_common_boards(user1, user2, context=self.context)[:6]
         return boards
 
 
@@ -71,6 +81,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create(**validated_data)
         return user
 
+
 class UserLookupSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(
         view_name="user-detail-lookup",
@@ -82,6 +93,7 @@ class UserLookupSerializer(serializers.ModelSerializer):
             "email",
             "nickname",
             "first_name",
+            "last_name",
             "url",
         ]
     def to_representation(self, instance):
@@ -89,5 +101,4 @@ class UserLookupSerializer(serializers.ModelSerializer):
         email: str = representation.get("email")
         if email and email.endswith("@admin.pl"):
             representation["email"] = "hidden@hidden.pl"
-        
         return representation
