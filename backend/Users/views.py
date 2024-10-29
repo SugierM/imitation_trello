@@ -18,7 +18,6 @@ class UserCreateView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
 
-
 class UserSearchView(generics.ListAPIView):
     serializer_class = UserLookupSerializer
     permission_classes = [IsAuthenticated]
@@ -50,17 +49,25 @@ class UserSearchView(generics.ListAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     
-
-class UserProfile(APIView):
+class UserProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated, IsOwnProfile]
     serializer_class = UserProfileSerializer
 
-    def get(self, request):
-        user = request.user
-        serializer = UserProfileSerializer(user)
-        return Response(serializer.data)
+    def get_object(self):
+        return self.request.user
     
 
+class UserProfileDeleteView(generics.DestroyAPIView): # as I hope nobody will do it
+    permission_classes = [IsAuthenticated, IsOwnProfile]
+    serializer_class = UserProfileSerializer
+
+    def get_object(self):
+        return self.request.user
+    
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+
+    
 class UserLookupView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserProfileSerializer
@@ -73,7 +80,8 @@ class UserLookupView(generics.RetrieveAPIView):
         else:
             return Response({"invalid": "Invalid data"}, status=404)
              
-class OtherUserPorfile(generics.RetrieveAPIView):
+
+class OtherUserPorfileView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = OtherUserProfileSerializer
     queryset = User.objects.all()
@@ -83,8 +91,3 @@ class OtherUserPorfile(generics.RetrieveAPIView):
         context["user1"] = self.request.user
         return context
 
-
-# AFTER LOGGING IN
-
-# class UserUpdateView(generics.UpdateAPIView):
-#     queryset = User.objects.all()

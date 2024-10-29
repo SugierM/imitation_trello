@@ -3,7 +3,6 @@ from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 
 
-
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -25,6 +24,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
         user = User.objects.create(**validated_data)
         return user
     
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            if attr == "password":
+                value = make_password(value)
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
     
@@ -35,11 +42,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
         return representation
     
-    def update(self, instance, validated_data):
-        phone = validated_data.get('phone', None)
-        if phone and not phone.startswith('+48'):
-            validated_data['phone'] = '+48' + phone # change it later
-        return super().update(instance, validated_data)
+    # def update(self, instance, validated_data):
+    #     phone = validated_data.get('phone', None)
+    #     if phone and not phone.startswith('+48'):
+    #         validated_data['phone'] = '+48' + phone # change it later
+    #     return super().update(instance, validated_data)
 
 
 class OtherUserProfileSerializer(UserProfileSerializer):
@@ -51,13 +58,14 @@ class OtherUserProfileSerializer(UserProfileSerializer):
                   'first_name',
                   'last_name',
                   'bio',
-                  'phone',
                   'nickname',
                   'password',
-                  "last_login",
-                  "boards",
+                  'last_login',
+                  'boards',
                   ]
-
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
     def get_boards(self, obj):
         from Boards.serializers import BoardMembershipSerializer
         user1 = self.context.get("user1")

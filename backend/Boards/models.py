@@ -37,7 +37,7 @@ class Element(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     due_date = models.DateField(null=True, blank=True)
-    order = models.PositiveIntegerField(default=0)
+    order = models.PositiveIntegerField(default=0) # Think about this one!
     status = models.IntegerField(choices=Status.choices, default=Status.ONGOING)
 
     def __str__(self) -> str:

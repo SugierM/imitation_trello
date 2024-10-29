@@ -29,7 +29,7 @@ Not a documentation for enduser.
 # API routes
 ## Users
 For all activieties must be authenticated.*  
-
+`
 "users/" - Main branch <br>
     ... create_user/ - User creation (login: email, password: passwords) <br>
         Doesn't have to be authenticated.  <br>
@@ -64,7 +64,9 @@ For all activieties must be authenticated.*
             "nickname": "John",
             "last_login": null 
         }
-        *last_login null for now as if you log in through frontend, it won't change
+        *last_login null for now as if you log in through frontend, it won't change  
+
+    ... "profile_destroy/ - Deletes user profile (not tested)  
 
     ... "retr_user/<int:pk>/" - returns user and common boards with logged in user  
 
@@ -92,12 +94,62 @@ For all activieties must be authenticated.*
             ...
             ]
         }
-
+`
 *Exeptions signaled individually  
 
 ## Boards
 
 
-"boards/"  
+`
+boards/ - main branch 
+Up to change as doesn't make sense in generall
 
-Routers were used. Implementation in progress.  
+    ... boards_create/ - Creates board with specific details
+        name - board name
+        description - board description
+        status - 0 or 1 where 0 means "Ongoing" and 1 means "Done"
+
+    ... boards_destroy/int/ - Deletes board with specific ID
+
+    ... boards/int/ - returns information about given board
+        {
+            "name": "Name",
+            "description": "Description",
+            "status": 0,
+            "creator": {
+                "email": "email@email.pl",
+                "nickname": "",
+                "first_name": "",
+                "last_name": "",
+                "url": ".../users/retr_user/int/"
+            }
+        }
+
+    ... boards_list/ - returns list of boards user can see  
+    {
+        "count": int,
+        "next": null,
+        "previous": null,
+        "results": [
+            {
+                "name": "Name",
+                "status": 0,
+                "board_url": ".../boards/boards/1/",
+                "board_creator": "User Full Name"
+            },
+            ...
+        ]
+    }
+
+    ... elements/int/ - returns information about specific element
+    status - 0/1/2 > (Ongoing/Done/Postponed)
+    order - defults to 0
+    {
+        "board_url": ".../boards/boards/int/",
+        "name": "Name",
+        "description": "Element task test see",
+        "due_date": null,
+        "order": 0,
+        "status": 0
+    }
+`
