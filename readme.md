@@ -101,8 +101,8 @@ For all activieties must be authenticated.*
 
 
 `
-boards/ - main branch 
-Up to change as doesn't make sense in generall
+boards/ - main branch  
+Up to change as doesn't make sense in general
 
     ... boards_create/ - Creates board with specific details
         name - board name
@@ -142,8 +142,8 @@ Up to change as doesn't make sense in generall
     }
 
     ... elements/int/ - returns information about specific element
-    status - 0/1/2 > (Ongoing/Done/Postponed)
-    order - defults to 0
+        status - 0/1/2 > (Ongoing/Done/Postponed)
+        order - defaults to 0
     {
         "board_url": ".../boards/boards/int/",
         "name": "Name",
@@ -152,4 +152,34 @@ Up to change as doesn't make sense in generall
         "order": 0,
         "status": 0
     }
+
+    ... elements_create/ - Creates new task
+        board - Board id
+        name - Name
+        description - Description
+        due_date - Due date (Can be null, but not now)
+        order - Order in which it shows on page (Maybe it won't be seen in the future)
+        status - 0/1/2 > (Ongoing/Done/Postponed)
+
+        *Now due to some bugs you can't create elements without due_date  
+
+    ... elements_destroy/int/ - Delets element with specific id
+
+    ... elements_list/int/ - Returns list with elements that belong to board with specific id (from url)
+        {
+            "count": int,
+            "next": null,
+            "previous": null,
+            "results": [
+                {
+                    "board_url": ".../boards/boards/3/",
+                    "name": "Name",
+                    "description": "Element task test see",
+                    "due_date": null,
+                    "order": 0,
+                    "status": 0
+                },
+                ...
+            ]
+        }
 `
