@@ -134,7 +134,7 @@ Up to change as doesn't make sense in general
             {
                 "name": "Name",
                 "status": 0,
-                "board_url": ".../boards/boards/1/",
+                "board_url": ".../boards/boards/int/",
                 "board_creator": "User Full Name"
             },
             ...
@@ -147,7 +147,7 @@ Up to change as doesn't make sense in general
     {
         "board_url": ".../boards/boards/int/",
         "name": "Name",
-        "description": "Element task test see",
+        "description": "",
         "due_date": null,
         "order": 0,
         "status": 0
@@ -157,8 +157,8 @@ Up to change as doesn't make sense in general
         board - Board id
         name - Name
         description - Description
-        due_date - Due date (Can be null, but not now)
-        order - Order in which it shows on page (Maybe it won't be seen in the future)
+        due_date - Due date
+        order - Order in which it shows on page
         status - 0/1/2 > (Ongoing/Done/Postponed)
 
         *Now due to some bugs you can't create elements without due_date  

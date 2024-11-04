@@ -15,11 +15,12 @@ function UserProfile() {
     } 
     return <div>
             <p>Email: {user.email || "No email provided"}</p>
+            <p>First name: {user.first_name || "No name provided"}</p>
+            <p>Last name: {user.last_name || "No last name provided"}</p>
             <p>Bio: {user.bio || "None existent"}</p>
             <p>Nickname: {user.nickname || "No nickname provided"}</p>
             <p>Phone: {user.phone || "No phone provided"}</p>
         </div>
-
 }
 
 export default UserProfile

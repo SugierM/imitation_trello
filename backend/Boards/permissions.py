@@ -3,7 +3,8 @@ from .models import *
 
 class IsRoleAuthorized(BasePermission):
     def has_permission(self, request, view):
-        if view.action == "create" and view.basename == 'board':
+        model_name = self.get_model_name(view)
+        if request.method == "POST" and model_name == "board":
             return request.user.is_authenticated
         return True
 
@@ -22,7 +23,7 @@ class IsRoleAuthorized(BasePermission):
         user_role = membership.role
         resource = obj.__class__.__name__
         
-        action = self.get_action(view)
+        action = self.get_action(request.method, view)
         allowed_actions = ROLE_PERMISSIONS.get(user_role, {}).get(resource, [])
         return action in allowed_actions
 
@@ -44,13 +45,20 @@ class IsRoleAuthorized(BasePermission):
         else:
             return None
 
-    def get_action(self, view):
-        if view.action in ['list', 'retrieve']:
-            return 'view_' + view.basename
-        elif view.action == 'create':
-            return 'add_' + view.basename
-        elif view.action in ['update', 'partial_update']:
-            return 'change_' + view.basename
-        elif view.action == 'destroy':
-            return 'delete_' + view.basename
+    def get_action(self, method, view):
+        model_name = self.get_model_name(view)
+        if method == 'GET':
+            return 'view_' + model_name
+        elif method == 'POST':
+            return 'add_' + model_name
+        elif method in ['PUT', 'PATCH']:
+            return 'change_' + model_name
+        elif method == 'DELETE':
+            return 'delete_' + model_name
         return None
+    
+
+    def get_model_name(self, view):
+        if hasattr(view, 'queryset') and view.queryset is not None:
+            return view.queryset.model.__name__.lower()
+        return view.__class__.__name__.lower()

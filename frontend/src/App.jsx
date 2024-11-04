@@ -8,6 +8,8 @@ import Home from "./pages/Home"
 import NotAuthorized from "./pages/NotAuthorized"
 import NotFound from "./pages/NotFound"
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"
+import UserSearchForm from "./pages/SearchUserForm"
+import UserEditForm from "./pages/UserEdit"
 
 
 function Logout(){
@@ -29,6 +31,8 @@ function App() {
         <Route path="/logout" element={<Logout />}></Route>
         <Route path="/register" element={<Register />}> </Route>
         <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>}></Route>
+        <Route path="/search_user" element={<ProtectedRoute><UserSearchForm /></ProtectedRoute>}></Route>
+        <Route path="/edit_profile" element={<ProtectedRoute><UserEditForm /></ProtectedRoute>}></Route>
         <Route path="*" element={<NotFound />}></Route>
       </Routes>
     </BrowserRouter>

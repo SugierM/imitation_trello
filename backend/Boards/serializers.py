@@ -4,6 +4,7 @@ from Users.serializers import UserLookupSerializer
 from datetime import date
 from Users.models import User
 
+# -------------------------------------------------------------- BOARDS ------------------------------------------------------------------------------------------------
 
 class BoardSerializer(serializers.ModelSerializer):
     creator = UserLookupSerializer()
@@ -25,7 +26,6 @@ class BoardSerializer(serializers.ModelSerializer):
         return value
     
         
-
 class BoardCreateSerialzier(serializers.ModelSerializer):
     class Meta:
         model = Board
@@ -67,6 +67,7 @@ class BoardsListSerializer(serializers.ModelSerializer):
     def get_board_creator(self, obj):
         return obj.creator.get_full_name() if obj.creator else None
 
+# -------------------------------------------------------------- ELEMENTS -----------------------------------------------------------------------------------------------
 
 class ElementSerializer(serializers.ModelSerializer):
     board_url = serializers.HyperlinkedIdentityField(
@@ -76,26 +77,28 @@ class ElementSerializer(serializers.ModelSerializer):
     )
     class Meta:
         model = Element
-        fields = ["board_url", "name", "description", "due_date", "order", "status"]
+        fields = ["board_url", "board", "name", "description", "due_date", "order", "status"]
 
-    def validate_name(self, value):
-        if len (value) < 4:
-            raise serializers.ValidationError({"name": "Name must be at least 4 characters long"}) 
+    def validate_due_date(self, value):
+        if value is None:
+            pass
+        elif value < date.today():
+            raise serializers.ValidationError("Due date must be in the future")
         return value
     
-    # No matter what i do i cant compare None with datetime :(
-    # Now you can create wihtout giving a due date
 
+    def validate_name(self, value):
+        board_id = self.initial_data.get("board")
+        if board_id:
+            board = Board.objects.get(id=board_id)
+        else:
+            raise serializers.ValidationError("This board doesn't exist")
+        
+        if Element.objects.filter(board=board, name=value).exists():
+            raise serializers.ValidationError("An element with this name already exists within this board.")
+        
+        return value
 
-    # def validate_due_date(self, value):
-        # if value is False: 
-        #     value = 0
-        #     return None
-        # if not isinstance(value, date):
-        #     raise serializers.ValidationError("Due date must be a valid date.")
-        # elif value < date.today():
-        #     raise serializers.ValidationError("Due date must be in the future")
-        # return value
     
 
 class ElementCreateSerializer(serializers.ModelSerializer):
@@ -110,23 +113,89 @@ class ElementCreateSerializer(serializers.ModelSerializer):
         ]
 
     def validate_due_date(self, value):
-        if value < date.today():
+        if value is None:
+            pass
+        elif value < date.today():
+            raise serializers.ValidationError("Due date must be in the future")
+        return value
+    
+
+    def validate_name(self, value):
+        board_id = self.initial_data.get("board")
+        if board_id:
+            board = Board.objects.get(id=board_id)
+        else:
+            raise serializers.ValidationError("This board doesn't exist")
+        
+        if Element.objects.filter(board=board, name=value).exists():
+            raise serializers.ValidationError("An element with this name already exists within this board.")
+        
+        return value
+
+# -------------------------------------------------------------- TASKS ------------------------------------------------------------------------------------------------
+
+class TaskSerializer(serializers.ModelSerializer):
+    element_url = serializers.HyperlinkedIdentityField(
+        view_name='element-detail',
+        lookup_field='element_id',
+        lookup_url_kwarg='pk',
+    )
+    class Meta:
+        model = Task
+        fields = ['element_url', 'element', 'name', 'description', 'due_date', 'priority',
+                   'labels', 'status']
+        
+    def validate_name(self, value):
+        element_id = self.initial_data.get("element")
+        if element_id:
+            element = Element.objects.get(id=element_id)
+        else:
+            raise serializers.ValidationError("This element does't exists.")
+        
+        if Task.objects.filter(element=element, name=value).exists():
+            raise serializers.ValidationError("Task with this name already exists within this element.")
+
+        return value
+
+    def validate_due_date(self, value):
+        if value is None:
+            pass
+        elif value < date.today():
             raise serializers.ValidationError("Due date must be in the future")
         return value
 
 
-
-
-
-
-
-# Leave it for now
-class TaskSerializer(serializers.ModelSerializer):
+class TaskCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ['element', 'name', 'description', 'due_date', 'priority',
                    'labels', 'status']
 
+    def validate_name(self, value):
+        element_id = self.initial_data.get("element")
+        if element_id:
+            element = Element.objects.get(id=element_id)
+        else:
+            raise serializers.ValidationError("This element does't exists.")
+        
+        if Task.objects.filter(element=element, name=value).exists():
+            raise serializers.ValidationError("Task with this name already exists within this element.")
+
+        return value
+    
+    def validate_due_date(self, value):
+        if value is None:
+            pass
+        elif value < date.today():
+            raise serializers.ValidationError("Due date must be in the future")
+        return value
+
+# -------------------------------------------------------------- SUBTASKS ----------------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------- BOARDS ------------------------------------------------------------------------------------------------
+
+
+# Leave it for now
 class SubTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubTask

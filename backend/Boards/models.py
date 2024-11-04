@@ -6,6 +6,7 @@ from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
 from guardian.shortcuts import assign_perm, remove_perm
 
+
 class Board(models.Model):
     class Status(models.IntegerChoices):
         ONGOING = 0, 'Ongoing'

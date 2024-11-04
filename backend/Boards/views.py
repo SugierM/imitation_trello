@@ -10,8 +10,7 @@ from django.contrib import messages
 from .serializers import *
 
 
-class PermissionDefaultMixin():
-    permission_classes = [IsAuthenticated, IsRoleAuthorized]
+permission_classes = [IsAuthenticated, IsRoleAuthorized]
 
 
 # -------------------------------------------------------------- BOARDS ------------------------------------------------------------------------------------------------
@@ -19,19 +18,23 @@ class BoardCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = BoardCreateSerialzier
 
-class BoardView(generics.RetrieveUpdateAPIView, PermissionDefaultMixin):
+
+class BoardView(generics.RetrieveUpdateAPIView):
     serializer_class = BoardSerializer
+    permission_classes = permission_classes
     lookup_field = "pk"
     queryset = Board.objects.all()
 
 
-class BoardDestroyView(generics.DestroyAPIView, PermissionDefaultMixin):
+class BoardDestroyView(generics.DestroyAPIView):
     serializer_class = BoardSerializer
+    permission_classes = permission_classes
     queryset = Board.objects.all()
 
 
-class BoardListView(generics.ListAPIView, PermissionDefaultMixin):
+class BoardListView(generics.ListAPIView):
     serializer_class = BoardsListSerializer
+    permission_classes = permission_classes
     
     def get_queryset(self):
         user = self.request.user
@@ -39,64 +42,67 @@ class BoardListView(generics.ListAPIView, PermissionDefaultMixin):
 
     
 # -------------------------------------------------------------- ELEMENTS -----------------------------------------------------------------------------------------------
-class ElementCreateView(generics.CreateAPIView, PermissionDefaultMixin):
+class ElementCreateView(generics.CreateAPIView):
     serializer_class = ElementCreateSerializer
+    permission_classes = permission_classes
     queryset = Element.objects.all()
 
-class ElementView(generics.RetrieveUpdateAPIView, PermissionDefaultMixin): 
+class ElementView(generics.RetrieveUpdateAPIView): 
     serializer_class = ElementSerializer
+    permission_classes = permission_classes
     lookup_field = "pk"
     queryset = Element.objects.all()
 
 
-class ElementDestroyView(generics.DestroyAPIView, PermissionDefaultMixin):
+class ElementDestroyView(generics.DestroyAPIView):
     serializer_class = ElementSerializer
+    permission_classes = permission_classes
     queryset = Element.objects.all()
 
 
-class ElementListView(generics.ListAPIView, PermissionDefaultMixin):
+class ElementListView(generics.ListAPIView):
     serializer_class = ElementSerializer
+    permission_classes = permission_classes
 
     def get_queryset(self):
         board_id = self.kwargs.get("board")
         return Element.objects.filter(board__id=board_id)
 
 
+# ---------------------------------------------------------------- TASK -------------------------------------------------------------------------------------------------
+
+class TaskView(generics.RetrieveUpdateAPIView): 
+    serializer_class = TaskSerializer
+    permission_classes = permission_classes
+    lookup_field = "pk"
+    queryset = Task.objects.all()
+
+
+class TaskListView(generics.ListAPIView):
+    serializer_class = TaskSerializer
+    permission_classes = permission_classes
     
-# class BoardView(generics.ListAPIView):
-#     serializer_class = BoardSerializer
-#     queryset = Board.objects.all()
-    
+    def get_queryset(self):
+        element_id = self.kwargs.get("element")
+        return Task.objects.filter(element__id=element_id)
 
-# class BoardViewSet(ModelViewSet, PermissionDefaultMixin):
-#     serializer_class = BoardSerializer
 
-#     def get_queryset(self):
-#         user = self.request.user
-#         return Board.objects.filter(memberships__user=user)
+class TaskCreateView(generics.CreateAPIView):
+    permission_classes = permission_classes
+    serializer_class = TaskCreateSerializer
+    queryset = Task.objects.all()
 
-# class TaskViewSet(ModelViewSet, PermissionDefaultMixin):
-#     serializer_class = TaskSerializer
 
-#     def get_queryset(self):
-#         return Task.objects.filter(element__board__memberships__user=self.request.user)
-    
-#     def create(self, request, *args, **kwargs):
-#         element_id = request.data.get('element')
-#         try:
-#             element = Element.objects.get(id=element_id)
-#         except Element.DoesNotExist:
-#             return Response({"detail": "Element not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-#         board = element.board
-        
-#         if not BoardMembership.objects.filter(user=request.user, board=board, role__in=["ADMIN", "EDITOR"]).exists():
-#             return Response({"detail": "You don't have permissions for that"}, status=status.HTTP_403_FORBIDDEN)
-        
-        
-#         response = super().create(request, *args, **kwargs)
+class TaskDestroyView(generics.DestroyAPIView):
+    permission_classes = permission_classes
+    serializer_class = TaskSerializer
+    queryset = Task.objects.all()
 
-#         if response.status_code == status.HTTP_201_CREATED:
-#             return redirect('task-list') # CHANGE IT IN THE FUTURE (it's to avoid multiple 'creates' during testing)
 
-#         return response
+# --------------------------------------------------------------- SUBTASK -----------------------------------------------------------------------------------------------
+
+
+# ------------------------------------------------------------- ATTACHMENT ----------------------------------------------------------------------------------------------
+
+
+# -------------------------------------------------------------- COMMENTS -----------------------------------------------------------------------------------------------# 
