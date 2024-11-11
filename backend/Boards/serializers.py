@@ -10,7 +10,7 @@ class BoardSerializer(serializers.ModelSerializer):
     creator = UserLookupSerializer()
     class Meta:
         model = Board
-        fields = ['name', 'description', 'status', "creator"]
+        fields = ['pk', 'name', 'description', 'status', "creator"]
 
         extra_kwargs = {
             "creator": {"read_only": True}
@@ -58,6 +58,7 @@ class BoardsListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Board
         fields = [
+            "pk",
             "name",
             "status",
             "board_url",

@@ -1,3 +1,6 @@
+This is a backend project. The UI is being developed to help me understand how frontend and backend interact, thus decoration will come later.
+
+
 # For now just .env
 POSTGRES_USER=""
 POSTGRES_PASSWORD=""
@@ -24,6 +27,11 @@ Not a documentation for enduser.
 "/logout" - Logout with redirection  <br>
 "/register" - Register form  <br>
 "/profile" - Profile page (Protected route, accessible only to authenticated users.) <br> 
+"/edit_profile" - Edit logged in user (Protected route, accessible only to authenticated users.) <br>
+"/search_user" - Search users (Protected route, accessible only to authenticated users.). <br>
+    Users can be searched based on name, last name or nickname. <br>
+
+
 
 
 # API routes
@@ -99,7 +107,7 @@ For all activieties must be authenticated.*
 
 ## Boards
 
-
+Not everything up to date. Will be updated as soon as changes are done completly
 `
 boards/ - main branch  
 Up to change as doesn't make sense in general

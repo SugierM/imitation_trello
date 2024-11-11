@@ -1,5 +1,3 @@
-import Header from "./components/Header/Header"
-import Footer from "./components/Footer/Footer"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
@@ -10,6 +8,9 @@ import NotFound from "./pages/NotFound"
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"
 import UserSearchForm from "./pages/SearchUserForm"
 import UserEditForm from "./pages/UserEdit"
+import OtherProfile from "./pages/OtherProfile"
+import Boards from "./pages/Boards"
+import BoardsDetail from "./pages/BoardsDetail"
 
 
 function Logout(){
@@ -32,7 +33,11 @@ function App() {
         <Route path="/register" element={<Register />}> </Route>
         <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>}></Route>
         <Route path="/search_user" element={<ProtectedRoute><UserSearchForm /></ProtectedRoute>}></Route>
+        <Route path="/otherprofile/:url" element={<ProtectedRoute><OtherProfile /></ProtectedRoute>}></Route>
+        <Route path="/boards/:pk" element={<ProtectedRoute><BoardsDetail /></ProtectedRoute>}></Route>
         <Route path="/edit_profile" element={<ProtectedRoute><UserEditForm /></ProtectedRoute>}></Route>
+        <Route path="/boards" element={<ProtectedRoute><Boards /></ProtectedRoute>}></Route>
+        <Route path="/not_auth" element={<ProtectedRoute><NotAuthorized /></ProtectedRoute>}></Route>
         <Route path="*" element={<NotFound />}></Route>
       </Routes>
     </BrowserRouter>

@@ -13,7 +13,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
                   'phone',
                   'nickname',
                   'password',
-                  "last_login", # singal last logged in from frotend
+                  'last_login', # singal last logged in from frotend
                   ]
         extra_kwargs = {
                 'password': {'write_only': True}

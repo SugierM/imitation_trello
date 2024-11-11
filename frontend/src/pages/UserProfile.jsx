@@ -1,5 +1,6 @@
 import api from "../services/api";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 function UserProfile() {
     const [user, setUser] = useState({})
@@ -20,6 +21,7 @@ function UserProfile() {
             <p>Bio: {user.bio || "None existent"}</p>
             <p>Nickname: {user.nickname || "No nickname provided"}</p>
             <p>Phone: {user.phone || "No phone provided"}</p>
+            <Link to="/edit_profile">Edit</Link>
         </div>
 }
 
