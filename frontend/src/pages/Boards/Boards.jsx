@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import api from '../services/api'
-import CardBoards from '../components/PageElements/CardBoards'
+import api from '../../services/api'
+import CardBoards from '../../components/PageElements/CardBoards'
+import { Link } from 'react-router-dom';
 
 function Boards() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -34,6 +35,8 @@ function Boards() {
     return (
         <div>
             {error && <p>{error}</p>}
+            <Link to={"/boards/create"}>Create</Link>
+            <hr />
             <div>
                 {boards.results.length > 0 ? (
                     boards.results.map((board, index) => (

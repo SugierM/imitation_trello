@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import api from '../services/api';
-import CardBoards from '../components/PageElements/CardBoards';
+import api from '../../services/api';
+import CardBoards from '../../components/PageElements/CardBoards';
 
 function OtherProfile() {
   const { url } = useParams();

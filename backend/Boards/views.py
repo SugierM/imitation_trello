@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 from .permissions import IsRoleAuthorized
 from django.contrib import messages
 from .serializers import *
+from django.db.models import Count, Q, Min, OuterRef, Subquery
+from django.core.exceptions import PermissionDenied
 
 
 permission_classes = [IsAuthenticated, IsRoleAuthorized]
@@ -20,10 +22,15 @@ class BoardCreateView(generics.CreateAPIView):
 
 
 class BoardView(generics.RetrieveUpdateAPIView):
+    queryset = Board.objects.annotate(
+        total_elements=Count("elements"),
+        completed_elements = Count("elements", filter=Q(elements__status=1)),
+        first_to_end_date = Min("elements__due_date"),
+    )
+
     serializer_class = BoardSerializer
     permission_classes = permission_classes
     lookup_field = "pk"
-    queryset = Board.objects.all()
 
 
 class BoardDestroyView(generics.DestroyAPIView):
@@ -47,6 +54,7 @@ class ElementCreateView(generics.CreateAPIView):
     permission_classes = permission_classes
     queryset = Element.objects.all()
 
+
 class ElementView(generics.RetrieveUpdateAPIView): 
     serializer_class = ElementSerializer
     permission_classes = permission_classes
@@ -66,6 +74,11 @@ class ElementListView(generics.ListAPIView):
 
     def get_queryset(self):
         board_id = self.kwargs.get("board")
+        user = self.request.user
+
+        is_member = BoardMembership.objects.filter(user=user, board=board_id).exists()
+        if not is_member:
+            raise PermissionDenied("You don't have permissions to see this.")
         return Element.objects.filter(board__id=board_id)
 
 

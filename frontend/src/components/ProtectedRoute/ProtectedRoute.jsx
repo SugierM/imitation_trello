@@ -50,6 +50,7 @@ function ProtectedRoute({children}){
         }
         const decoded = jwtDecode(token)
         const tokenExpiration = decoded.exp
+        // console.log(`Expiration: ${tokenExpiration}`)
         const now = Date.now() / 1000
 
         if (tokenExpiration < now) {

@@ -3,29 +3,81 @@ from .models import *
 from Users.serializers import UserLookupSerializer
 from datetime import date
 from Users.models import User
+from rest_framework.reverse import reverse
 
 # -------------------------------------------------------------- BOARDS ------------------------------------------------------------------------------------------------
-
-class BoardSerializer(serializers.ModelSerializer):
+class BoardBaseSerializer(serializers.ModelSerializer):
     creator = UserLookupSerializer()
     class Meta:
         model = Board
-        fields = ['pk', 'name', 'description', 'status', "creator"]
+        fields = [
+            "pk", 
+            "name", 
+            "description", 
+            "status", 
+            "creator",
+        ] 
 
-        extra_kwargs = {
-            "creator": {"read_only": True}
-        }
+        read_only_fields = [
+            "creator"
+        ]
 
+
+class BoardSerializer(BoardBaseSerializer):
+    can_edit = serializers.SerializerMethodField()
+    total_elements = serializers.IntegerField()
+    completed_elements = serializers.IntegerField()
+    first_to_end_date = serializers.DateField()                   # Date
+    first_to_end_name = serializers.SerializerMethodField()  # String
+    first_to_end_url = serializers.SerializerMethodField()   # URL
+    class Meta:
+        model = Board
+        fields = BoardBaseSerializer.Meta.fields + [ 
+            "can_edit", 
+            "total_elements", 
+            "completed_elements",
+            "first_to_end_date",
+            "first_to_end_name",
+            "first_to_end_url",
+        ]
+
+        read_only_fields = BoardBaseSerializer.Meta.read_only_fields + [
+            "can_edit",
+            "total_elements", 
+            "completed_elements",
+            "first_to_end",
+            "first_to_end_name",
+            "first_to_end_url",
+        ]
+        
+    def get_can_edit(self, obj):
+        request = self.context.get("request")
+        if request:
+            edit_roles = ["ADMIN", "EDITOR"]
+            return obj.memberships.filter(user=request.user, role__in=edit_roles).exists()
+        
+    def get_first_to_end_url(self, obj):
+        element = obj.elements.order_by("due_date").first()
+        if element:
+            return reverse("element-detail", kwargs={"pk": element.id})
+        return None
+    
+    def get_first_to_end_name(self, obj):
+        element = obj.elements.order_by("due_date").first()
+        if element:
+            return element.name
+        return None
+        
     def validate_name(self, value):
         if len (value) < 4:
-            raise serializers.ValidationError({"name": "Name must be at least 4 characters long"}) 
+            raise serializers.ValidationError("Name must be at least 4 characters long") 
 
         user = self.context["request"].user 
         if Board.objects.filter(name=value, creator=user).exists():
-            raise serializers.ValidationError({"name": "You have already created board with this name"})
+            raise serializers.ValidationError("You have already created board with this name")
         return value
-    
-        
+
+
 class BoardCreateSerialzier(serializers.ModelSerializer):
     class Meta:
         model = Board
@@ -78,7 +130,7 @@ class ElementSerializer(serializers.ModelSerializer):
     )
     class Meta:
         model = Element
-        fields = ["board_url", "board", "name", "description", "due_date", "order", "status"]
+        fields = ["pk", "board_url", "board", "name", "description", "due_date", "order", "status"]
 
     def validate_due_date(self, value):
         if value is None:
@@ -100,7 +152,6 @@ class ElementSerializer(serializers.ModelSerializer):
         
         return value
 
-    
 
 class ElementCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -229,5 +280,5 @@ class BoardMembershipSerializer(serializers.ModelSerializer):
             ).values_list("board", flat=True).distinct()
         
         boards = Board.objects.filter(id__in=common_boards_ids)
-        return BoardSerializer(boards, many=True, context=context).data
+        return BoardBaseSerializer(boards, many=True, context=context).data
 

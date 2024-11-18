@@ -20,24 +20,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load environment variables
 SECRET_KEY = os.getenv('SECRET_KEY', "").strip('"')
 
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
 
 INSTALLED_APPS = [
-    # Default Django apps...
+    # Default Django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Third-party apps...
+    # Third-party apps
     'sslserver',
     'corsheaders',
     'guardian',
     'rest_framework',
     'rest_framework_simplejwt',
-    # My apps...
+    # My apps
     'Users',
     'Boards',
     'APIcalls',
@@ -61,7 +61,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10000),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
     'SLIDING_TOKEN_LIFETIME': timedelta(days=30),
     'SLIDING_TOKEN_REFRESH_LIFETIME_LATE_USER': timedelta(days=1),
