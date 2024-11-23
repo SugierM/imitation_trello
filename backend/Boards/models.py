@@ -1,10 +1,12 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+# from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.conf import settings
-from django.db.models.signals import post_save, m2m_changed
-from django.dispatch import receiver
-from guardian.shortcuts import assign_perm, remove_perm
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+# from django.db.models.signals import post_save, m2m_changed
+# from django.dispatch import receiver
+# from guardian.shortcuts import assign_perm, remove_perm
 
 
 class Board(models.Model):
@@ -107,8 +109,11 @@ class SubTask(models.Model):
 
 
 class Comment(models.Model):
-    task = models.ForeignKey(Task, related_name='comments', on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.IntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -123,9 +128,14 @@ class Comment(models.Model):
     
 
 class Attachment(models.Model):
-    task = models.ForeignKey(Task, related_name='attachments', on_delete=models.CASCADE)
-    file = models.FileField(upload_to='attachments/')
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.IntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    file = models.FileField(upload_to="attachments/")
+    extension = models.CharField(max_length=10, blank=True, editable=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
 
 class Activity(models.Model):
@@ -164,7 +174,7 @@ ROLE_PERMISSIONS = {
         'Task': ['add_task', 'change_task', 'delete_task', 'view_task'],
         'SubTask': ['add_subtask', 'change_subtask', 'delete_subtask', 'view_subtask'],
         'Comment': ['add_comment', 'change_comment', 'delete_comment', 'view_comment'],
-        'Attachment': ['add_attachment', 'change_attachment', 'delete_attachment', 'view_attachment'],
+        'Attachment': ['add_attachment', 'delete_attachment', 'view_attachment'],
         'Activity': ['view_activity'],
     },
     'EDITOR': {
@@ -173,7 +183,7 @@ ROLE_PERMISSIONS = {
         'Task': ['add_task', 'change_task', 'view_task'],
         'SubTask': ['add_subtask', 'change_subtask', 'view_subtask'],
         'Comment': ['add_comment', 'change_comment', 'view_comment'],
-        'Attachment': ['add_attachment', 'change_attachment', 'view_attachment'],
+        'Attachment': ['add_attachment', 'view_attachment', 'delete_attachment'],
         'Activity': ['view_activity'],
     },
     'MEMBER': {
@@ -182,6 +192,7 @@ ROLE_PERMISSIONS = {
         'Task': ['change_task', 'view_task'],
         'SubTask': ['change_subtask', 'view_subtask'],
         'Comment': ['add_comment', 'change_comment', 'view_comment'],
+        'Attachment': ['add_attachment', 'view_attachment'],
         'Activity': ['view_activity'],
     },
     'VISITOR': {
@@ -189,8 +200,8 @@ ROLE_PERMISSIONS = {
         'Element': ['view_element'],
         'Task': ['view_task'],
         'SubTask': ['view_subtask'],
-        'Comment': ['view_comment'],
-        'Attachment': ['view_attachment'],
-        'Activity': ['view_activity'],
+        'Comment': [],
+        'Attachment': [],
+        'Activity': [],
     },
 }

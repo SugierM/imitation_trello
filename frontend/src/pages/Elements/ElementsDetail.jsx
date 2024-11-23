@@ -12,12 +12,20 @@ function ElementDetail() {
         due_date: null,
         order: null,
         status: null})
+    const [firstTask, setFirstTask] = useState({
+        name: "",
+        pk: "",
+        due_date: ""
+    })
 
         useEffect(() => {
             const fetchElement = async () => {
                 try {
                     const response = await api.get(`boards/elements/${pk}/`);
                     setElement(response.data);
+                    if (response.data.first_task){
+                        setFirstTask(response.data.first_task)
+                    }
                 } catch (error) {
                     if (error.response && error.response.status === 403) {
                         navigate("/not_auth");
@@ -34,6 +42,7 @@ function ElementDetail() {
         <div>
             <p>{element.name}</p>
             <p>{element.description || "No description"}</p>
+            <p>First to end: {firstTask.name || "No tasks with due date"}</p>
         </div>
     )
 }

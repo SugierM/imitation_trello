@@ -39,18 +39,24 @@ function ElementsList({ boardId }) {
                 ))}
             </ul>
             <div>
-                <button 
-                    onClick={() => fetchElements(prevUrl)} 
-                    disabled={!prevUrl}
-                >
-                    Previous
-                </button>
-                <button 
-                    onClick={() => fetchElements(nextUrl)} 
-                    disabled={!nextUrl}
-                >
-                    Next
-                </button>
+            {(prevUrl || nextUrl) && (
+                <div>
+                    <button 
+                        onClick={() => fetchElements(prevUrl)} 
+                        disabled={!prevUrl}
+                    >
+                        Previous
+                    </button>
+                    <button 
+                        onClick={() => fetchElements(nextUrl)} 
+                        disabled={!nextUrl}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
+            
+                    
             </div>
         </div>
     );

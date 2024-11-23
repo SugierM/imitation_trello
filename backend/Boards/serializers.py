@@ -27,27 +27,21 @@ class BoardSerializer(BoardBaseSerializer):
     can_edit = serializers.SerializerMethodField()
     total_elements = serializers.IntegerField()
     completed_elements = serializers.IntegerField()
-    first_to_end_date = serializers.DateField()                   # Date
-    first_to_end_name = serializers.SerializerMethodField()  # String
-    first_to_end_url = serializers.SerializerMethodField()   # URL
+    first_element = serializers.SerializerMethodField()
     class Meta:
         model = Board
         fields = BoardBaseSerializer.Meta.fields + [ 
             "can_edit", 
             "total_elements", 
             "completed_elements",
-            "first_to_end_date",
-            "first_to_end_name",
-            "first_to_end_url",
+            "first_element"
         ]
 
         read_only_fields = BoardBaseSerializer.Meta.read_only_fields + [
             "can_edit",
             "total_elements", 
             "completed_elements",
-            "first_to_end",
-            "first_to_end_name",
-            "first_to_end_url",
+            "first_element",
         ]
         
     def get_can_edit(self, obj):
@@ -56,17 +50,16 @@ class BoardSerializer(BoardBaseSerializer):
             edit_roles = ["ADMIN", "EDITOR"]
             return obj.memberships.filter(user=request.user, role__in=edit_roles).exists()
         
-    def get_first_to_end_url(self, obj):
-        element = obj.elements.order_by("due_date").first()
+    def get_first_element(self, obj):
+        element = obj.elements.exclude(due_date__isnull=True).order_by("-due_date").first()
         if element:
-            return reverse("element-detail", kwargs={"pk": element.id})
+            return {
+                "name": element.name,
+                "due_date": element.due_date,
+                "pk": element.pk
+            }
         return None
     
-    def get_first_to_end_name(self, obj):
-        element = obj.elements.order_by("due_date").first()
-        if element:
-            return element.name
-        return None
         
     def validate_name(self, value):
         if len (value) < 4:
@@ -100,21 +93,14 @@ class BoardCreateSerialzier(serializers.ModelSerializer):
 
 
 class BoardsListSerializer(serializers.ModelSerializer):
-    board_url = serializers.HyperlinkedIdentityField(
-        view_name = "board-detail",
-        lookup_field = "pk",
-    )
-
     board_creator = serializers.SerializerMethodField()
-
     class Meta:
         model = Board
         fields = [
             "pk",
             "name",
             "status",
-            "board_url",
-            "board_creator" 
+            "board_creator",
         ]
 
     def get_board_creator(self, obj):
@@ -122,15 +108,39 @@ class BoardsListSerializer(serializers.ModelSerializer):
 
 # -------------------------------------------------------------- ELEMENTS -----------------------------------------------------------------------------------------------
 
-class ElementSerializer(serializers.ModelSerializer):
-    board_url = serializers.HyperlinkedIdentityField(
-        view_name = "board-detail",
-        lookup_field = "board_id",
-        lookup_url_kwarg = "pk"
-    )
+class ElementsBaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Element
-        fields = ["pk", "board_url", "board", "name", "description", "due_date", "order", "status"]
+        fields = [
+            "pk",
+            "board", 
+            "name", 
+            "description", 
+            "due_date", 
+            "order", 
+            "status",
+        ]
+        read_only_fields = [
+            "pk",
+            "board",
+            ]
+        
+    def get_can_edit(self, obj):
+        request = self.context.get("request")
+        if request:
+            edit_roles = ["ADMIN", "EDITOR"]
+            return obj.board.memberships.filter(user=request.user, role__in=edit_roles).exists()
+
+    def get_first_task(self, obj):
+        task = obj.tasks.exclude(due_date__isnull=True).order_by("-due_date").first()
+        if task:
+            return {
+                "name": task.name,
+                "pk": task.pk,
+                "due_date": task.due_date
+            }
+        return None
+
 
     def validate_due_date(self, value):
         if value is None:
@@ -138,7 +148,7 @@ class ElementSerializer(serializers.ModelSerializer):
         elif value < date.today():
             raise serializers.ValidationError("Due date must be in the future")
         return value
-    
+
 
     def validate_name(self, value):
         board_id = self.initial_data.get("board")
@@ -151,6 +161,31 @@ class ElementSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("An element with this name already exists within this board.")
         
         return value
+
+class ElementsSerializer(ElementsBaseSerializer):
+    can_edit = serializers.SerializerMethodField()
+    total_tasks = serializers.IntegerField()
+    completed_tasks = serializers.IntegerField()
+    first_task = serializers.SerializerMethodField()
+    postponed_tasks = serializers.IntegerField()
+    
+    class Meta:
+        model = Element
+        fields = ElementsBaseSerializer.Meta.fields + [
+            "can_edit",
+            "total_tasks",
+            "completed_tasks",
+            "postponed_tasks",
+            "first_task",
+            ]
+        
+        read_only_fields = ElementsBaseSerializer.Meta.read_only_fields + [
+            "first_task",
+            "total_tasks",
+            "completed_tasks",
+            "postponed_tasks"
+            ]
+        
 
 
 class ElementCreateSerializer(serializers.ModelSerializer):
@@ -187,14 +222,9 @@ class ElementCreateSerializer(serializers.ModelSerializer):
 # -------------------------------------------------------------- TASKS ------------------------------------------------------------------------------------------------
 
 class TaskSerializer(serializers.ModelSerializer):
-    element_url = serializers.HyperlinkedIdentityField(
-        view_name='element-detail',
-        lookup_field='element_id',
-        lookup_url_kwarg='pk',
-    )
     class Meta:
         model = Task
-        fields = ['element_url', 'element', 'name', 'description', 'due_date', 'priority',
+        fields = ['element', 'name', 'description', 'due_date', 'priority',
                    'labels', 'status']
         
     def validate_name(self, value):
@@ -202,7 +232,7 @@ class TaskSerializer(serializers.ModelSerializer):
         if element_id:
             element = Element.objects.get(id=element_id)
         else:
-            raise serializers.ValidationError("This element does't exists.")
+            raise serializers.ValidationError("This element doesn't exists.")
         
         if Task.objects.filter(element=element, name=value).exists():
             raise serializers.ValidationError("Task with this name already exists within this element.")
@@ -244,25 +274,7 @@ class TaskCreateSerializer(serializers.ModelSerializer):
 
 # -------------------------------------------------------------- SUBTASKS ----------------------------------------------------------------------------------------------
 
-# -------------------------------------------------------------- BOARDS ------------------------------------------------------------------------------------------------
-
-
-# Leave it for now
-class SubTaskSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SubTask
-
-class LabelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Label
-
-class CommentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Comment
-
-class AttachmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Attachment
+# ---------------------------------------------------------- BOARD MEMBERSHIPS -----------------------------------------------------------------------------------------
 
 class BoardMembershipSerializer(serializers.ModelSerializer):
     class Meta:
@@ -281,4 +293,84 @@ class BoardMembershipSerializer(serializers.ModelSerializer):
         
         boards = Board.objects.filter(id__in=common_boards_ids)
         return BoardBaseSerializer(boards, many=True, context=context).data
+
+
+# -------------------------------------------------------------- COMMENTS ----------------------------------------------------------------------------------------------
+
+class CommentSerializer(serializers.ModelSerializer):
+    time_stamp = serializers.SerializerMethodField()
+    class Meta:
+        model = Comment
+        fields = [
+            "author",
+            "text",
+            "time_stamp"
+        ]
+
+        read_only_fields = [
+            "author",
+            "time_stamp"
+        ]
+
+
+    def get_time_stamp(self, obj):
+        return str(obj)
+
+
+class CommentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = [
+            "content_type",
+            "object_id",
+            "content_object",
+            "text"
+        ]
+
+# ------------------------------------------------------------ ATTACHMENTS ----------------------------------------------------------------------------------------------
+
+# Create, Retrieve or Delete
+class AttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attachment
+        fields = [
+            "file",
+            "extension",
+            "uploaded_at",
+            "author",
+        ]
+        read_only_fields = [
+            "extension",
+            "author",
+            "uploaded_at",
+        ]
+    
+    def validate_file(self, value):
+        allowed_extensions = ["png", "jpg", "jpeg", "pdf", "doc", "docx", "txt"]
+        extension = value.name.split(".")[-1]
+        if extension not in allowed_extensions:
+            raise serializers.ValidationError(f"Files with extension '{extension}' are not allowed")
+        
+        self.context["validated_extension"] = extension
+        return value
+    
+
+    def create(self, validated_data):
+        validated_data['extension'] = self.context.get('validated_extension')
+        return super().create(validated_data)
+
+
+# Leave it for now
+class SubTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubTask
+
+
+class LabelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Label
+
+
+
+
 

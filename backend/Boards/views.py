@@ -8,8 +8,9 @@ from rest_framework.permissions import IsAuthenticated
 from .permissions import IsRoleAuthorized
 from django.contrib import messages
 from .serializers import *
-from django.db.models import Count, Q, Min, OuterRef, Subquery
+from django.db.models import Count, Q, OuterRef, Subquery
 from django.core.exceptions import PermissionDenied
+from django.http import JsonResponse
 
 
 permission_classes = [IsAuthenticated, IsRoleAuthorized]
@@ -25,7 +26,6 @@ class BoardView(generics.RetrieveUpdateAPIView):
     queryset = Board.objects.annotate(
         total_elements=Count("elements"),
         completed_elements = Count("elements", filter=Q(elements__status=1)),
-        first_to_end_date = Min("elements__due_date"),
     )
 
     serializer_class = BoardSerializer
@@ -56,20 +56,24 @@ class ElementCreateView(generics.CreateAPIView):
 
 
 class ElementView(generics.RetrieveUpdateAPIView): 
-    serializer_class = ElementSerializer
+    queryset = Element.objects.annotate(
+        total_tasks = Count("tasks"),
+        completed_tasks = Count("tasks", filter=Q(tasks__status=1)),
+        postponed_tasks = Count("tasks", filter=Q(tasks__status=2))
+    )
+    serializer_class = ElementsSerializer
     permission_classes = permission_classes
     lookup_field = "pk"
-    queryset = Element.objects.all()
 
 
 class ElementDestroyView(generics.DestroyAPIView):
-    serializer_class = ElementSerializer
+    serializer_class = ElementsBaseSerializer
     permission_classes = permission_classes
     queryset = Element.objects.all()
 
 
 class ElementListView(generics.ListAPIView):
-    serializer_class = ElementSerializer
+    serializer_class = ElementsBaseSerializer
     permission_classes = permission_classes
 
     def get_queryset(self):
