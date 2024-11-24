@@ -48,7 +48,6 @@ function BoardsDetail() {
             {board ? (
                 <div>
                     <h2>{board.name || "Board - Name"}</h2>
-                    {console.log(board)}
                     <p>Description: {board.description || "No description provided"}</p>
                     <p>Status: {board.status === 0 ? "Ongoing" : "Done"}</p>
                     <p>Creator: {creator.nickname || creator.first_name + " " + creator.last_name ||"Unknown"}</p>
@@ -60,6 +59,7 @@ function BoardsDetail() {
             ) : (
                 <p>No board data available</p>
             )}
+            <h2>Elements for Board {board.name}</h2>
             <ElementsList boardId={pk}></ElementsList>
         </div>
     );

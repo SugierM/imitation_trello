@@ -1,6 +1,7 @@
 import api from "../../services/api"
 import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
+import TasksList from "../Tasks/TasksList"
 
 
 function ElementDetail() {
@@ -12,6 +13,7 @@ function ElementDetail() {
         due_date: null,
         order: null,
         status: null})
+        
     const [firstTask, setFirstTask] = useState({
         name: "",
         pk: "",
@@ -43,6 +45,7 @@ function ElementDetail() {
             <p>{element.name}</p>
             <p>{element.description || "No description"}</p>
             <p>First to end: {firstTask.name || "No tasks with due date"}</p>
+            <TasksList elementId={pk}></TasksList>
         </div>
     )
 }

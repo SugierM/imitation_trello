@@ -104,7 +104,7 @@ class BoardsListSerializer(serializers.ModelSerializer):
         ]
 
     def get_board_creator(self, obj):
-        return obj.creator.get_full_name() if obj.creator else None
+        return obj.pk
 
 # -------------------------------------------------------------- ELEMENTS -----------------------------------------------------------------------------------------------
 
@@ -162,6 +162,7 @@ class ElementsBaseSerializer(serializers.ModelSerializer):
         
         return value
 
+
 class ElementsSerializer(ElementsBaseSerializer):
     can_edit = serializers.SerializerMethodField()
     total_tasks = serializers.IntegerField()
@@ -186,7 +187,6 @@ class ElementsSerializer(ElementsBaseSerializer):
             "postponed_tasks"
             ]
         
-
 
 class ElementCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -221,11 +221,13 @@ class ElementCreateSerializer(serializers.ModelSerializer):
 
 # -------------------------------------------------------------- TASKS ------------------------------------------------------------------------------------------------
 
-class TaskSerializer(serializers.ModelSerializer):
+class TaskBaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ['element', 'name', 'description', 'due_date', 'priority',
-                   'labels', 'status']
+        fields = ['pk', 'element', 'name', 'description', 'due_date', 'priority',
+                   'labels', 'status', 'assigned']
+        
+        read_only_fields = ["pk", "name", "element", "description", "due_date", "priority"]
         
     def validate_name(self, value):
         element_id = self.initial_data.get("element")
@@ -244,6 +246,21 @@ class TaskSerializer(serializers.ModelSerializer):
             pass
         elif value < date.today():
             raise serializers.ValidationError("Due date must be in the future")
+        return value
+
+    def validate_assigned(self, value):
+        board_id = self.instance.element.board if self.instance else None
+        if not board_id:
+            raise serializers.ValidationError("Cannot determine board for this task")
+        
+        try:
+            membership = BoardMembership.objects.get(board=board_id, user=value)
+        except BoardMembership.DoesNotExist:
+            raise serializers.ValidationError("User is not member of a board")
+        print(membership.role)
+        if membership and (membership.role == "VISITOR"):
+            raise serializers.ValidationError("Cannot assign visitor as responsible for a task")
+        
         return value
 
 

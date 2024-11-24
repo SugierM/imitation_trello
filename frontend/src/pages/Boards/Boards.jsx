@@ -37,13 +37,13 @@ function Boards() {
             {error && <p>{error}</p>}
             <Link to={"/boards/create"}>Create</Link>
             <hr />
-            <div>
+            <div style={{margin: "0px 0px 40px 30px"}}>
                 {boards.results.length > 0 ? (
                     boards.results.map((board, index) => (
                         <CardBoards
                             key={index}
                             board={board}
-                            PUrl={board.board_url}
+                            creator={board.board_creator}
                         />
                     ))
                 ) : (

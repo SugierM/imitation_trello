@@ -79,6 +79,7 @@ class Task(models.Model):
     priority = models.IntegerField(choices=Priority.choices, default=Priority.LEAST_IMPORTANT)
     labels = models.ManyToManyField(Label, related_name='tasks', blank=True)
     status = models.IntegerField(choices=Status.choices, default=Status.ONGOING)
+    assigned = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='responsible_tasks')
 
     class Meta:
         indexes = [
@@ -189,9 +190,9 @@ ROLE_PERMISSIONS = {
     'MEMBER': {
         'Board': ['view_board'],
         'Element': ['view_element'],
-        'Task': ['change_task', 'view_task'],
-        'SubTask': ['change_subtask', 'view_subtask'],
-        'Comment': ['add_comment', 'change_comment', 'view_comment'],
+        'Task': ['view_task'],
+        'SubTask': ['view_subtask'],
+        'Comment': ['add_comment', 'view_comment'],
         'Attachment': ['add_attachment', 'view_attachment'],
         'Activity': ['view_activity'],
     },
@@ -199,7 +200,7 @@ ROLE_PERMISSIONS = {
         'Board': ['view_board'],
         'Element': ['view_element'],
         'Task': ['view_task'],
-        'SubTask': ['view_subtask'],
+        'SubTask': [],
         'Comment': [],
         'Attachment': [],
         'Activity': [],

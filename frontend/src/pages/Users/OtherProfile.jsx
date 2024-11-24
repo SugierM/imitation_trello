@@ -4,15 +4,14 @@ import api from '../../services/api';
 import CardBoards from '../../components/PageElements/CardBoards';
 
 function OtherProfile() {
-  const { url } = useParams();
+  const { pk } = useParams();
   const [data, setData] = useState({});
   const [boards, setBoards] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const path = new URL(url).pathname;
-        const response = await api.get(decodeURIComponent(path));
+        const response = await api.get(`users/retr_user/${pk}/`);
         setData(response.data);
         setBoards(response.data.boards || []);
       } catch (error) {
@@ -20,7 +19,7 @@ function OtherProfile() {
       }
     };
     fetchData();
-  }, [url]);
+  }, [pk]);
 
   return (
     <div>

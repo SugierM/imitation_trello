@@ -10,7 +10,6 @@ function UserProfile() {
     const getUser = () =>{
         api.get("/users/profile/", ).then((res) => res.data).then((data) => {
             setUser(data)
-            console.log(data)
         }).catch((error) => alert(error))
         
     } 

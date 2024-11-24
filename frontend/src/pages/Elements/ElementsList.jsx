@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../services/api";
+import fetchList from "../../services/helpFunctions";
 import { Link } from "react-router-dom";
 
 function ElementsList({ boardId }) {
@@ -8,17 +9,15 @@ function ElementsList({ boardId }) {
     const [prevUrl, setPrevUrl] = useState(null);
     const [error, setError] = useState("");
 
-    const fetchElements = async (url) => {
-        try {
-            const response = await api.get(url);
-            setElements(response.data.results);
-            setNextUrl(response.data.next);
-            setPrevUrl(response.data.previous);
-        } catch (error) {
-            console.error("Error fetching elements:", error);
-            setError("Failed to load elements.");
-        }
-    };
+    const fetchElements = (url) => {
+        fetchList(
+            url,
+            setElements,
+            setNextUrl,
+            setPrevUrl,
+            "elements"
+        )
+    }
 
     useEffect(() => {
         const initialUrl = `/boards/elements_list/${boardId}`;
@@ -27,7 +26,6 @@ function ElementsList({ boardId }) {
 
     return (
         <div style={{margin: "2px 2px 40px 2px"}}>
-            <h2>Elements for Board {boardId}</h2>
             {error && <p style={{ color: "red" }}>{error}</p>}
             <ul>
                 {elements.map((element, index) => (

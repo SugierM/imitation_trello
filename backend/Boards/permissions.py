@@ -62,3 +62,27 @@ class IsRoleAuthorized(BasePermission):
         if hasattr(view, 'queryset') and view.queryset is not None:
             return view.queryset.model.__name__.lower()
         return view.__class__.__name__.lower()
+    
+
+class TaskAssignedOrRoleAuthorized(IsRoleAuthorized):
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+
+        # if obj.__class__.__name__ == "Task" and request.method in ["PUT", "PATCH"]:
+        #     return obj.assigned == user
+
+        board = self.get_board_from_object(obj)
+        if not board:
+            return False
+        
+        try:
+            membership = BoardMembership.objects.get(user=user, board=board)
+        except BoardMembership.DoesNotExist:
+            return False
+
+        user_role = membership.role
+        resource = obj.__class__.__name__
+
+        action = self.get_action(request.method, view)
+        allowed_actions = ROLE_PERMISSIONS.get(user_role, {}).get(resource, [])
+        return action in allowed_actions

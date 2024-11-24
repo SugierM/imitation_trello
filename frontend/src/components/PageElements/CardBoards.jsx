@@ -3,34 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-function CardBoards({ board, PUrl }) {
+function CardBoards({ board, creator }) {
     const [url, setUrl] = useState("");
-    const [creator, setCreator] = useState({});
     const navigate = useNavigate();
 
-    useEffect(() => {
-        setUrl(PUrl);
-        setCreator(board.creator); 
-    }, [board]);
-
-    const UserProfileButton = () => {
-        const otherProfileUrl = encodeURIComponent(url);
-        navigate(`/otherprofile/${otherProfileUrl}`);
-    };
-
-    const BoardDetail = () => {
-        navigate(`/boards/${board.pk}`)
-    }
-
     return (
-        <div className="card">
-            <div className="card-title">
-                <Link to={`/boards/${board.pk}`}><h2>{board.name}</h2></Link>
-            </div>
-            <div className="card-content">
-                <p>Description: {board.description || "No description"}</p>
-                <p>Status: {board.status === 0 ? "Ongoing" : "Done"}</p>
-                <button onClick={UserProfileButton}>Creator</button>
+        <div className="card" style={{width: "18rem", height: "280px", margin: "6px 5px 6px 5px"}}>
+            <div className="card-body">
+                <h5 className="card-title"><Link to={`/boards/${board.pk}`}>{board.name}</Link></h5>
+                <p className="card-text">Description: {board.description || "No description"}</p>
+                <div style={{position: "absolute", bottom: 0}}>
+                    <p href="#" className="btn btn-primary"><Link to={`/otherprofile/${creator}`} style={{color: "white"}}>Creator</Link></p>
+                </div>
             </div>
         </div>
     );

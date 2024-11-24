@@ -22,7 +22,6 @@ function UserSearchForm(){
 
         try {
             const response = await api.get(url);
-            console.log(response);
             setResult(response.data);
         } catch (err) {
             setError("Failed to get users");
@@ -74,7 +73,7 @@ function UserSearchForm(){
                                 email={user.email}
                                 first_name={user.first_name}
                                 last_name={user.last_name}
-                                urlFunction={() => UserProfileButton(user.url)}
+                                urlFunction={() => UserProfileButton(user.pk)}
                             />
                         ))}
                     </ul>

@@ -92,10 +92,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 
 class UserLookupSerializer(serializers.ModelSerializer):
-    url = serializers.HyperlinkedIdentityField(
-        view_name="user-detail-lookup",
-        lookup_field="pk"
-    )
     class Meta:
         model = User
         fields = [
@@ -103,7 +99,7 @@ class UserLookupSerializer(serializers.ModelSerializer):
             "nickname",
             "first_name",
             "last_name",
-            "url",
+            "pk"
         ]
     def to_representation(self, instance):
         representation = super().to_representation(instance)

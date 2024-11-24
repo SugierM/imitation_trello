@@ -3,9 +3,8 @@ from .models import Board, BoardMembership, Task, Element
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from .serializers import BoardSerializer, TaskSerializer
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsRoleAuthorized
+from .permissions import *
 from django.contrib import messages
 from .serializers import *
 from django.db.models import Count, Q, OuterRef, Subquery
@@ -89,14 +88,14 @@ class ElementListView(generics.ListAPIView):
 # ---------------------------------------------------------------- TASK -------------------------------------------------------------------------------------------------
 
 class TaskView(generics.RetrieveUpdateAPIView): 
-    serializer_class = TaskSerializer
-    permission_classes = permission_classes
+    serializer_class = TaskBaseSerializer
+    permission_classes = [IsAuthenticated, TaskAssignedOrRoleAuthorized]
     lookup_field = "pk"
     queryset = Task.objects.all()
 
 
 class TaskListView(generics.ListAPIView):
-    serializer_class = TaskSerializer
+    serializer_class = TaskBaseSerializer
     permission_classes = permission_classes
     
     def get_queryset(self):
@@ -112,7 +111,7 @@ class TaskCreateView(generics.CreateAPIView):
 
 class TaskDestroyView(generics.DestroyAPIView):
     permission_classes = permission_classes
-    serializer_class = TaskSerializer
+    serializer_class = TaskBaseSerializer
     queryset = Task.objects.all()
 
 
