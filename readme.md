@@ -1,4 +1,4 @@
-Documentation will be updated later. Some endpoints are changeg, UI has more views. A little less time in December :(
+Documentation will be updated later. Some endpoints are changed, UI has more views. A little less time in December :(
 
 
 # For now just .env
