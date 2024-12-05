@@ -1,4 +1,4 @@
-This is a backend project. The UI is being developed to help me understand how frontend and backend interact, thus decoration will come later.
+Documentation will be updated later. Some endpoints are changeg, UI has more views. A little less time in December :(
 
 
 # For now just .env
